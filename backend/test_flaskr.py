@@ -6,6 +6,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flaskr import create_app
 from models import setup_db, Question, Category
 
+p = "postgres"
+l = "localhost:5432"
+dbp = "{}://{}:{}@{}/{}"
+
 
 class TriviaTestCase(unittest.TestCase):
     """This class represents the trivia test case"""
@@ -15,20 +19,20 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "trivia_test"
-        self.database_path = "postgres://postgres:postgres@{}/{}".format('localhost:5432', self.database_name)
+        self.database_path = dbp.format(p, p, p, l, self.database_name)
         setup_db(self.app, self.database_path)
 
         #   Sample data to be used during tests
         self.new_question = {
-            "question":"Why did the chicken cross the road?",
-            "answer":"To get to the other side",
-            "category":5,
-            "difficulty":1
+            "question": "Why did the chicken cross the road?",
+            "answer": "To get to the other side",
+            "category": 5,
+            "difficulty": 1
             }
 
         self.quiz = {
-            "previous_questions":[11],
-            "quiz_category":{'type': 'Sports', 'id': '6'}
+            "previous_questions": [11],
+            "quiz_category": {'type': 'Sports', 'id': '6'}
             }
 
         # binds the app to the current context
@@ -44,7 +48,8 @@ class TriviaTestCase(unittest.TestCase):
 
     """
     TODO
-    Write at least one test for each test for successful operation and for expected errors.
+    Write at least one test for each test for successful operation
+    and for expected errors.
     """
     def test_retrieve_categories(self):
         res = self.client().get('/categories')
@@ -109,7 +114,6 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['created'])
         self.assertTrue(len(data['questions']))
 
-
     def test_422_create_question_fails(self):
         res = self.client().post('/questions', json={})
         data = json.loads(res.data)
@@ -119,7 +123,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'unprocessable')
 
     def test_question_search(self):
-        res = self.client().post('/questions', json={'searchTerm':'what'})
+        res = self.client().post('/questions', json={'searchTerm': 'what'})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -128,7 +132,9 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(len(data['questions']), 8)
 
     def test_question_search_without_results(self):
-        res = self.client().post('/questions', json={'searchTerm':'BlahBlahBlahBlahBlah'})
+        res = self.client().post('/questions', json={
+            'searchTerm': 'BlahBlahBlahBlahBlah'
+        })
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
